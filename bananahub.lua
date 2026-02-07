@@ -112,4 +112,83 @@ for _,text in ipairs(items) do
 	end)
 end
 
-print("Banana Cat Hub UI loaded (SAFE MODE)")
+-- ===== Farming (UI ONLY) =====
+local farmingSection = Instance.new("Frame", content)
+farmingSection.Size = UDim2.fromScale(1,0.9)
+farmingSection.BackgroundTransparency = 1
+
+local header = Instance.new("TextLabel", farmingSection)
+header.Size = UDim2.fromScale(1,0.08)
+header.BackgroundTransparency = 1
+header.Text = "Setting Farm"
+header.Font = Enum.Font.GothamBold
+header.TextSize = 18
+header.TextColor3 = Color3.fromRGB(255,200,0)
+
+local farmList = Instance.new("UIListLayout", farmingSection)
+farmList.Padding = UDim.new(0,8)
+
+local function toggleRow(text)
+	local row = Instance.new("Frame", farmingSection)
+	row.Size = UDim2.fromScale(1,0.1)
+	row.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", row).CornerRadius = UDim.new(0,10)
+
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.fromScale(0.7,1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+	label.TextXAlignment = Left
+	label.TextColor3 = Color3.fromRGB(230,230,230)
+
+	local toggle = Instance.new("TextButton", row)
+	toggle.Size = UDim2.fromScale(0.08,0.6)
+	oggle.Position = UDim2.fromScale(0.9,0.2)
+	toggle.Text = ""
+	toggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	Instance.new("UICorner", toggle).CornerRadius = UDim.new(0,6)
+
+	local on = false
+	toggle.MouseButton1Click:Connect(function()
+		on = not on
+		toggle.BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(40,40,40)
+		print("[UI ONLY] Toggle", text, on)
+	end)
+end
+
+-- Select Method Farms (placeholder button)
+toggleRow("Select Method Farms")
+
+-- Distance Farm Aura (display only)
+local dist = Instance.new("Frame", farmingSection)
+dist.Size = UDim2.fromScale(1,0.1)
+dist.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", dist).CornerRadius = UDim.new(0,10)
+
+local dLabel = Instance.new("TextLabel", dist)
+dLabel.Size = UDim2.fromScale(0.7,1)
+dLabel.BackgroundTransparency = 1
+dLabel.Text = "Distance Farm Aura"
+dLabel.Font = Enum.Font.Gotham
+dLabel.TextSize = 14
+dLabel.TextXAlignment = Left
+dLabel.TextColor3 = Color3.fromRGB(230,230,230)
+
+local dValue = Instance.new("TextLabel", dist)
+dValue.Size = UDim2.fromScale(0.2,1)
+dValue.Position = UDim2.fromScale(0.75,0)
+dValue.BackgroundTransparency = 1
+dValue.Text = "300"
+dValue.Font = Enum.Font.GothamBold
+dValue.TextSize = 14
+dValue.TextColor3 = Color3.fromRGB(255,200,0)
+
+-- Toggles like the screenshot
+toggleRow("Ignore Attack Katakuri")
+toggleRow("Hop Find Katakuri")
+toggleRow("Auto Quest [Katakuri/Bone/Tyrant]")
+toggleRow("Start Farm")
+
+print("Banana Cat Hub UI loaded (SAFE MODE) + Farming UI")
