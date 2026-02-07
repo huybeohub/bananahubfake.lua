@@ -150,13 +150,54 @@ task.spawn(function()
 end)
 
 --------------------------------------------------
--- SERVER HOP
+-- SERVER HOP FIX (ANTI LOOP / ANTI KICK)
 --------------------------------------------------
-task.spawn(function()
-    while task.wait(20) do
-        if getgenv().ServerHop then
-            TP:Teleport(game.PlaceId,plr)
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local hopping = false
+local lastHop = 0
+
+local function GetLowServer()
+    local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+    local body = HttpService:JSONDecode(game:HttpGet(url))
+
+    for _,server in pairs(body.data) do
+        if server.playing < server.maxPlayers - 2
+        and server.id ~= game.JobId then
+            return server.id
         end
+    end
+end
+
+local function NeedHop()
+    -- không còn quái sống
+    for _,v in pairs(workspace.Enemies:GetChildren()) do
+        if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+            return false
+        end
+    end
+    return true
+end
+
+task.spawn(function()
+    while task.wait(10) do
+        if not getgenv().ServerHop then continue end
+        if hopping then continue end
+        if tick() - lastHop < 60 then continue end -- cooldown 60s
+        if not NeedHop() then continue end
+
+        hopping = true
+        lastHop = tick()
+
+        local serverId = GetLowServer()
+        if serverId then
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, plr)
+            end)
+        end
+
+        task.wait(5)
+        hopping = false
     end
 end)
 
