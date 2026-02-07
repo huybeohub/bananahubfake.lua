@@ -1,28 +1,68 @@
--- Banana Cat Hub (UI ONLY) - FULL MERGED CONFIG
--- Safe UI practice | No exploit | No autofarm
+-- Banana Cat Hub | UI ONLY
+-- A12: Toggle UI
+-- A13: Save Toggle Config
 
-print("Banana Cat Hub loading...")
-
--- SERVICES
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
--- GUI
-local gui = Instance.new("ScreenGui")
+-- ================= CONFIG SAVE =================
+local CONFIG_FILE = "BananaCatHub_Config.json"
+
+local Config = {
+	UIOpen = true,
+	IgnoreKatakuri = false,
+	HopKatakuri = false,
+	AutoQuest = false,
+	StartFarm = false
+}
+
+if readfile and isfile and isfile(CONFIG_FILE) then
+	local data = HttpService:JSONDecode(readfile(CONFIG_FILE))
+	for k,v in pairs(data) do
+		Config[k] = v
+	end
+end
+
+local function SaveConfig()
+	if writefile then
+		writefile(CONFIG_FILE, HttpService:JSONEncode(Config))
+	end
+end
+
+-- ================= UI ROOT =================
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "BananaCatHub"
 gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
 
--- MAIN FRAME
+-- ================= TOGGLE UI BUTTON =================
+local uiBtn = Instance.new("TextButton", gui)
+uiBtn.Size = UDim2.fromScale(0.06,0.08)
+uiBtn.Position = UDim2.fromScale(0.01,0.45)
+uiBtn.Text = "🍌"
+uiBtn.Font = Enum.Font.GothamBold
+uiBtn.TextSize = 22
+uiBtn.BackgroundColor3 = Color3.fromRGB(255,200,0)
+uiBtn.TextColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", uiBtn).CornerRadius = UDim.new(1,0)
+
+-- ================= MAIN =================
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.fromScale(0.55,0.6)
 main.Position = UDim2.fromScale(0.22,0.2)
 main.BackgroundColor3 = Color3.fromRGB(20,20,20)
 main.BorderSizePixel = 0
+main.Visible = Config.UIOpen
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,12)
 
--- TITLE
+uiBtn.MouseButton1Click:Connect(function()
+	Config.UIOpen = not Config.UIOpen
+	main.Visible = Config.UIOpen
+	SaveConfig()
+end)
+
+-- ================= TITLE =================
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.fromScale(1,0.1)
 title.BackgroundTransparency = 1
@@ -31,96 +71,67 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255,200,0)
 
--- SIDEBAR
+-- ================= SIDEBAR =================
 local side = Instance.new("Frame", main)
 side.Size = UDim2.fromScale(0.25,0.9)
 side.Position = UDim2.fromScale(0,0.1)
 side.BackgroundColor3 = Color3.fromRGB(15,15,15)
 side.BorderSizePixel = 0
-side.ClipsDescendants = true
 Instance.new("UICorner", side).CornerRadius = UDim.new(0,12)
 
 local sideLayout = Instance.new("UIListLayout", side)
 sideLayout.Padding = UDim.new(0,6)
 
--- SIDEBAR TOGGLE BUTTON
-local toggleSide = Instance.new("TextButton", main)
-toggleSide.Size = UDim2.fromScale(0.04,0.06)
-toggleSide.Position = UDim2.fromScale(0.005,0.02)
-toggleSide.Text = "≡"
-toggleSide.Font = Enum.Font.GothamBold
-toggleSide.TextSize = 18
-toggleSide.BackgroundColor3 = Color3.fromRGB(255,200,0)
-toggleSide.TextColor3 = Color3.fromRGB(30,30,30)
-Instance.new("UICorner", toggleSide).CornerRadius = UDim.new(1,0)
-
-local sideOpen = true
-toggleSide.MouseButton1Click:Connect(function()
-	sideOpen = not sideOpen
-	TweenService:Create(side, TweenInfo.new(0.25), {
-		Size = sideOpen and UDim2.fromScale(0.25,0.9) or UDim2.fromScale(0,0.9)
-	}):Play()
-end)
-
--- CONTENT
-local content = Instance.new("Frame", main)
-content.Size = UDim2.fromScale(0.72,0.9)
-content.Position = UDim2.fromScale(0.27,0.1)
-content.BackgroundColor3 = Color3.fromRGB(25,25,25)
-content.BorderSizePixel = 0
-Instance.new("UICorner", content).CornerRadius = UDim.new(0,12)
-
-local contentLayout = Instance.new("UIListLayout", content)
-contentLayout.Padding = UDim.new(0,10)
-
--- SIDEBAR SECTIONS + ICONS (A12)
 local sections = {
-	{icon="🛒", name="Shop"},
-	{icon="📊", name="Status And Server"},
-	{icon="👤", name="LocalPlayer"},
-	{icon="⚙️", name="Setting Farm"},
-	{icon="🎯", name="Hold And Select Skill"},
-	{icon="⚔️", name="Farming"},
-	{icon="📦", name="Stack Farming"},
-	{icon="🧩", name="Farming Other"},
-	{icon="🍎", name="Fruit and Raid, Dungeon"},
-	{icon="🌊", name="Sea Event"}
+	"Shop","Status And Server","LocalPlayer",
+	"Setting Farm","Hold And Select Skill",
+	"Farming","Stack Farming","Farming Other",
+	"Fruit and Raid, Dungeon","Sea Event"
 }
 
-local selectedButton = nil
+local currentTab
+for _,name in ipairs(sections) do
+	local b = Instance.new("TextButton", side)
+	b.Size = UDim2.fromScale(1,0.08)
+	b.Text = name
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 14
+	b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	b.TextColor3 = Color3.fromRGB(220,220,220)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
 
-for _,data in ipairs(sections) do
-	local btn = Instance.new("TextButton", side)
-	btn.Size = UDim2.fromScale(1,0.08)
-	btn.Text = "  "..data.icon.."  "..data.name
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 14
-	btn.TextXAlignment = Enum.TextXAlignment.Left
-	btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
-	btn.TextColor3 = Color3.fromRGB(200,200,200)
-	btn.BorderSizePixel = 0
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
-
-	btn.MouseButton1Click:Connect(function()
-		if selectedButton then
-			selectedButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
-			selectedButton.TextColor3 = Color3.fromRGB(200,200,200)
+	b.MouseButton1Click:Connect(function()
+		if currentTab then currentTab.Visible = false end
+		if name == "Farming" then
+			currentTab = farming
+			farming.Visible = true
 		end
-		btn.BackgroundColor3 = Color3.fromRGB(255,200,0)
-		btn.TextColor3 = Color3.fromRGB(30,30,30)
-		selectedButton = btn
 	end)
 end
 
--- ===== FARMING SECTION =====
-local farmingSection = Instance.new("Frame", content)
-farmingSection.Size = UDim2.fromScale(1,1)
-farmingSection.BackgroundTransparency = 1
-Instance.new("UIListLayout", farmingSection).Padding = UDim.new(0,8)
+-- ================= CONTENT =================
+local farming = Instance.new("Frame", main)
+farming.Size = UDim2.fromScale(0.72,0.9)
+farming.Position = UDim2.fromScale(0.27,0.1)
+farming.BackgroundColor3 = Color3.fromRGB(25,25,25)
+farming.BorderSizePixel = 0
+farming.Visible = false
+Instance.new("UICorner", farming).CornerRadius = UDim.new(0,12)
 
--- TOGGLE ROW (ANIMATED)
-local function toggleRow(text)
-	local row = Instance.new("Frame", farmingSection)
+local fLayout = Instance.new("UIListLayout", farming)
+fLayout.Padding = UDim.new(0,10)
+
+local header = Instance.new("TextLabel", farming)
+header.Size = UDim2.fromScale(1,0.08)
+header.BackgroundTransparency = 1
+header.Text = "Setting Farm"
+header.Font = Enum.Font.GothamBold
+header.TextSize = 18
+header.TextColor3 = Color3.fromRGB(255,200,0)
+
+-- ================= TOGGLE CREATOR =================
+local function createToggle(text,key)
+	local row = Instance.new("Frame", farming)
 	row.Size = UDim2.fromScale(1,0.1)
 	row.BackgroundColor3 = Color3.fromRGB(30,30,30)
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0,10)
@@ -134,38 +145,27 @@ local function toggleRow(text)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextColor3 = Color3.fromRGB(230,230,230)
 
-	local toggleBg = Instance.new("Frame", row)
-	toggleBg.Size = UDim2.fromScale(0.1,0.5)
-	toggleBg.Position = UDim2.fromScale(0.85,0.25)
-	toggleBg.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	Instance.new("UICorner", toggleBg).CornerRadius = UDim.new(1,0)
+	local toggle = Instance.new("TextButton", row)
+	toggle.Size = UDim2.fromScale(0.18,0.6)
+	toggle.Position = UDim2.fromScale(0.78,0.2)
+	toggle.Text = ""
+	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
 
-	local knob = Instance.new("Frame", toggleBg)
-	knob.Size = UDim2.fromScale(0.45,0.9)
-	knob.Position = UDim2.fromScale(0.05,0.05)
-	knob.BackgroundColor3 = Color3.fromRGB(200,200,200)
-	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+	local on = Config[key]
+	toggle.BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(60,60,60)
 
-	local btn = Instance.new("TextButton", toggleBg)
-	btn.Size = UDim2.fromScale(1,1)
-	btn.BackgroundTransparency = 1
-	btn.Text = ""
-
-	local on = false
-	btn.MouseButton1Click:Connect(function()
+	toggle.MouseButton1Click:Connect(function()
 		on = not on
-		TweenService:Create(toggleBg, TweenInfo.new(0.2), {
-			BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(40,40,40)
-		}):Play()
-		TweenService:Create(knob, TweenInfo.new(0.2), {
-			Position = on and UDim2.fromScale(0.5,0.05) or UDim2.fromScale(0.05,0.05)
-		}):Play()
+		Config[key] = on
+		toggle.BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(60,60,60)
+		SaveConfig()
 	end)
 end
 
-toggleRow("Ignore Attack Katakuri")
-toggleRow("Hop Find Katakuri")
-toggleRow("Auto Quest [Katakuri/Bone/Tyrant]")
-toggleRow("Start Farm")
+-- ================= FARMING TOGGLES =================
+createToggle("Ignore Attack Katakuri","IgnoreKatakuri")
+createToggle("Hop Find Katakuri","HopKatakuri")
+createToggle("Auto Quest [Katakuri/Bone/Tyrant]","AutoQuest")
+createToggle("Start Farm","StartFarm")
 
-print("Banana Cat Hub UI LOADED SUCCESSFULLY")
+print("✅ Banana Cat Hub | A12 + A13 Loaded")
