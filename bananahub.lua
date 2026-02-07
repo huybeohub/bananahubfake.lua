@@ -1,158 +1,115 @@
---// HUY BÉO HUB - BANANA STYLE
---// Single file | Clean | No key | Stable
+-- Banana Cat Hub (UI ONLY) - Safe Roblox UI Practice
+-- No exploit, no autofarm, no game injection
 
-repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local VirtualUser = game:GetService("VirtualUser")
-local plr = Players.LocalPlayer
+local player = Players.LocalPlayer
 
-----------------------------------------------------
--- GLOBAL FLAGS
-----------------------------------------------------
-getgenv().AutoFarm   = false
-getgenv().AutoBoss   = false
-getgenv().AutoRaid   = false
-getgenv().SafeFarm   = true
-getgenv().FixLag     = true
+local gui = Instance.new("ScreenGui")
+gui.Name = "BananaCatHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
 
-----------------------------------------------------
--- AUTO CLICK (XA + ỔN ĐỊNH)
-----------------------------------------------------
-task.spawn(function()
-    while task.wait(0.1) do
-        if getgenv().AutoFarm or getgenv().AutoBoss then
-            pcall(function()
-                VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                task.wait(0.02)
-                VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-            end)
-        end
-    end
-end)
-
-----------------------------------------------------
--- AUTO FARM + BRING + HOVER 12 STUD
-----------------------------------------------------
-task.spawn(function()
-    while task.wait(0.25) do
-        if not getgenv().AutoFarm then continue end
-
-        local char = plr.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
-
-        for _,mob in pairs(Workspace.Enemies:GetChildren()) do
-            if mob:FindFirstChild("Humanoid")
-            and mob:FindFirstChild("HumanoidRootPart")
-            and mob.Humanoid.Health > 0 then
-
-                mob.HumanoidRootPart.CanCollide = false
-                mob.Humanoid.WalkSpeed = 0
-                mob.Humanoid.JumpPower = 0
-
-                repeat
-                    hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0,12,0)
-
-                    -- bring quái cùng loại
-                    for _,v in pairs(Workspace.Enemies:GetChildren()) do
-                        if v.Name == mob.Name
-                        and v:FindFirstChild("HumanoidRootPart")
-                        and v:FindFirstChild("Humanoid")
-                        and v.Humanoid.Health > 0 then
-                            v.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame
-                            v.HumanoidRootPart.CanCollide = false
-                            v.Humanoid.WalkSpeed = 0
-                            v.Humanoid.JumpPower = 0
-                        end
-                    end
-                    task.wait()
-                until mob.Humanoid.Health <= 0 or not getgenv().AutoFarm
-            end
-        end
-    end
-end)
-
-----------------------------------------------------
--- FIX LAG / FPS BOOST
-----------------------------------------------------
-if getgenv().FixLag then
-    task.spawn(function()
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-            setfpscap(120)
-        end)
-        for _,v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.SmoothPlastic
-                v.Reflectance = 0
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Enabled = false
-            end
-        end
-    end)
-end
-
-----------------------------------------------------
--- UI BANANA STYLE
-----------------------------------------------------
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "HuyBeoHub"
-
+-- Main Frame
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.fromScale(0.32,0.38)
-main.Position = UDim2.fromScale(0.34,0.12)
-main.BackgroundColor3 = Color3.fromRGB(18,18,18)
-main.Active = true
-main.Draggable = true
-Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
+main.Size = UDim2.fromScale(0.55,0.6)
+main.Position = UDim2.fromScale(0.22,0.2)
+main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+main.BorderSizePixel = 0
+main.Name = "Main"
 
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,12)
+
+-- Title
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.fromScale(1,0.15)
-title.Text = "🍌 HUY BÉO HUB"
-title.Font = Enum.Font.GothamBlack
-title.TextScaled = true
-title.TextColor3 = Color3.fromRGB(255,215,120)
+title.Size = UDim2.fromScale(1,0.1)
 title.BackgroundTransparency = 1
+title.Text = "Banana Cat Hub - UI"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255,200,0)
 
-local function makeToggle(text,y,callback)
-    local btn = Instance.new("TextButton", main)
-    btn.Size = UDim2.fromScale(0.9,0.12)
-    btn.Position = UDim2.fromScale(0.05,y)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextScaled = true
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.BackgroundColor3 = Color3.fromRGB(55,55,55)
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+-- Sidebar
+local side = Instance.new("Frame", main)
+side.Size = UDim2.fromScale(0.25,0.9)
+side.Position = UDim2.fromScale(0,0.1)
+side.BackgroundColor3 = Color3.fromRGB(15,15,15)
+side.BorderSizePixel = 0
+Instance.new("UICorner", side).CornerRadius = UDim.new(0,12)
 
-    local state = false
-    btn.Text = text.." : OFF"
+local sections = {
+	"Shop",
+	"Status And Server",
+	"LocalPlayer",
+	"Setting Farm",
+	"Hold And Select Skill",
+	"Farming",
+	"Stack Farming",
+	"Farming Other",
+	"Fruit and Raid, Dungeon",
+	"Sea Event"
+}
 
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.Text = text.." : "..(state and "ON" or "OFF")
-        btn.BackgroundColor3 = state and Color3.fromRGB(60,140,60) or Color3.fromRGB(55,55,55)
-        callback(state)
-    end)
+local layout = Instance.new("UIListLayout", side)
+layout.Padding = UDim.new(0,6)
+
+for _,name in ipairs(sections) do
+	local btn = Instance.new("TextButton", side)
+	btn.Size = UDim2.fromScale(1,0.08)
+	btn.Text = name
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	btn.TextColor3 = Color3.fromRGB(220,220,220)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 end
 
-makeToggle("Auto Farm Level",0.18,function(v)
-    getgenv().AutoFarm = v
-end)
+-- Content Frame
+local content = Instance.new("Frame", main)
+content.Size = UDim2.fromScale(0.72,0.9)
+content.Position = UDim2.fromScale(0.27,0.1)
+content.BackgroundColor3 = Color3.fromRGB(25,25,25)
+content.BorderSizePixel = 0
+Instance.new("UICorner", content).CornerRadius = UDim.new(0,12)
 
-makeToggle("Auto Boss",0.32,function(v)
-    getgenv().AutoBoss = v
-end)
+local list = Instance.new("UIListLayout", content)
+list.Padding = UDim.new(0,10)
 
-makeToggle("Safe Farm / Anti Die",0.46,function(v)
-    getgenv().SafeFarm = v
-end)
+local items = {
+	"Redeem Code",
+	"Teleport Old World",
+	"Teleport New World",
+	"Teleport Third Sea",
+	"Buy Dual Flintlock",
+	"Reroll Race"
+}
 
-makeToggle("Fix Lag / FPS Boost",0.60,function(v)
-    getgenv().FixLag = v
-end)
+for _,text in ipairs(items) do
+	local row = Instance.new("Frame", content)
+	row.Size = UDim2.fromScale(1,0.12)
+	row.BackgroundTransparency = 1
 
-makeToggle("Close Hub",0.74,function()
-    gui:Destroy()
-end)
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.fromScale(0.7,1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 16
+	label.TextXAlignment = Left
+	label.TextColor3 = Color3.fromRGB(230,230,230)
+
+	local click = Instance.new("TextButton", row)
+	click.Size = UDim2.fromScale(0.25,0.6)
+	click.Position = UDim2.fromScale(0.73,0.2)
+	click.Text = "Click"
+	click.Font = Enum.Font.GothamBold
+	click.TextSize = 14
+	click.BackgroundColor3 = Color3.fromRGB(255,190,60)
+	click.TextColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", click).CornerRadius = UDim.new(0,10)
+
+	click.MouseButton1Click:Connect(function()
+		print("[UI ONLY] Clicked:", text)
+	end)
+end
+
+print("Banana Cat Hub UI loaded (SAFE MODE)")
