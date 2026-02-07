@@ -1,13 +1,11 @@
--- Banana Cat Hub | UI ONLY
--- A12: Toggle UI
--- A13: Save Toggle Config
+-- Banana Cat Hub | UI ONLY (FIXED)
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
--- ================= CONFIG SAVE =================
+-- ================= CONFIG =================
 local CONFIG_FILE = "BananaCatHub_Config.json"
 
 local Config = {
@@ -19,9 +17,13 @@ local Config = {
 }
 
 if readfile and isfile and isfile(CONFIG_FILE) then
-	local data = HttpService:JSONDecode(readfile(CONFIG_FILE))
-	for k,v in pairs(data) do
-		Config[k] = v
+	local ok,data = pcall(function()
+		return HttpService:JSONDecode(readfile(CONFIG_FILE))
+	end)
+	if ok then
+		for k,v in pairs(data) do
+			Config[k] = v
+		end
 	end
 end
 
@@ -31,12 +33,13 @@ local function SaveConfig()
 	end
 end
 
--- ================= UI ROOT =================
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+-- ================= GUI ROOT =================
+local gui = Instance.new("ScreenGui")
 gui.Name = "BananaCatHub"
 gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
 
--- ================= TOGGLE UI BUTTON =================
+-- Toggle UI button
 local uiBtn = Instance.new("TextButton", gui)
 uiBtn.Size = UDim2.fromScale(0.06,0.08)
 uiBtn.Position = UDim2.fromScale(0.01,0.45)
@@ -47,7 +50,7 @@ uiBtn.BackgroundColor3 = Color3.fromRGB(255,200,0)
 uiBtn.TextColor3 = Color3.fromRGB(30,30,30)
 Instance.new("UICorner", uiBtn).CornerRadius = UDim.new(1,0)
 
--- ================= MAIN =================
+-- Main
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.fromScale(0.55,0.6)
 main.Position = UDim2.fromScale(0.22,0.2)
@@ -62,7 +65,7 @@ uiBtn.MouseButton1Click:Connect(function()
 	SaveConfig()
 end)
 
--- ================= TITLE =================
+-- Title
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.fromScale(1,0.1)
 title.BackgroundTransparency = 1
@@ -70,6 +73,26 @@ title.Text = "Banana Cat Hub"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255,200,0)
+
+-- ================= FARMING FRAME (PHẢI TẠO TRƯỚC) =================
+local farming = Instance.new("Frame", main)
+farming.Size = UDim2.fromScale(0.72,0.9)
+farming.Position = UDim2.fromScale(0.27,0.1)
+farming.BackgroundColor3 = Color3.fromRGB(25,25,25)
+farming.BorderSizePixel = 0
+farming.Visible = false
+Instance.new("UICorner", farming).CornerRadius = UDim.new(0,12)
+
+local fLayout = Instance.new("UIListLayout", farming)
+fLayout.Padding = UDim.new(0,10)
+
+local header = Instance.new("TextLabel", farming)
+header.Size = UDim2.fromScale(1,0.08)
+header.BackgroundTransparency = 1
+header.Text = "Setting Farm"
+header.Font = Enum.Font.GothamBold
+header.TextSize = 18
+header.TextColor3 = Color3.fromRGB(255,200,0)
 
 -- ================= SIDEBAR =================
 local side = Instance.new("Frame", main)
@@ -109,27 +132,7 @@ for _,name in ipairs(sections) do
 	end)
 end
 
--- ================= CONTENT =================
-local farming = Instance.new("Frame", main)
-farming.Size = UDim2.fromScale(0.72,0.9)
-farming.Position = UDim2.fromScale(0.27,0.1)
-farming.BackgroundColor3 = Color3.fromRGB(25,25,25)
-farming.BorderSizePixel = 0
-farming.Visible = false
-Instance.new("UICorner", farming).CornerRadius = UDim.new(0,12)
-
-local fLayout = Instance.new("UIListLayout", farming)
-fLayout.Padding = UDim.new(0,10)
-
-local header = Instance.new("TextLabel", farming)
-header.Size = UDim2.fromScale(1,0.08)
-header.BackgroundTransparency = 1
-header.Text = "Setting Farm"
-header.Font = Enum.Font.GothamBold
-header.TextSize = 18
-header.TextColor3 = Color3.fromRGB(255,200,0)
-
--- ================= TOGGLE CREATOR =================
+-- ================= TOGGLE iOS STYLE =================
 local function createToggle(text,key)
 	local row = Instance.new("Frame", farming)
 	row.Size = UDim2.fromScale(1,0.1)
@@ -145,61 +148,26 @@ local function createToggle(text,key)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextColor3 = Color3.fromRGB(230,230,230)
 
-	local toggle = Instance.new("TextButton", row)
-	toggle.Size = UDim2.fromScale(0.18,0.6)
-	toggle.Position = UDim2.fromScale(0.78,0.2)
-	toggle.Text = ""
-	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
+	local bg = Instance.new("Frame", row)
+	bg.Size = UDim2.fromScale(0.18,0.45)
+	bg.Position = UDim2.fromScale(0.78,0.275)
+	bg.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(1,0)
 
-	local on = Config[key]
-	toggle.BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(60,60,60)
-
-	toggle.MouseButton1Click:Connect(function()
-		on = not on
-		Config[key] = on
-		toggle.BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(60,60,60)
-		SaveConfig()
-	end)
-end
-local function createToggle(text,key)
-	local row = Instance.new("Frame", farming)
-	row.Size = UDim2.fromScale(1,0.1)
-	row.BackgroundColor3 = Color3.fromRGB(30,30,30)
-	Instance.new("UICorner", row).CornerRadius = UDim.new(0,10)
-
-	local label = Instance.new("TextLabel", row)
-	label.Size = UDim2.fromScale(0.7,1)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.Font = Enum.Font.Gotham
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.TextColor3 = Color3.fromRGB(230,230,230)
-
-	-- Toggle background
-	local toggleBg = Instance.new("Frame", row)
-	toggleBg.Size = UDim2.fromScale(0.18,0.45)
-	toggleBg.Position = UDim2.fromScale(0.78,0.275)
-	toggleBg.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	Instance.new("UICorner", toggleBg).CornerRadius = UDim.new(1,0)
-
-	-- Knob
-	local knob = Instance.new("Frame", toggleBg)
+	local knob = Instance.new("Frame", bg)
 	knob.Size = UDim2.fromScale(0.45,0.85)
 	knob.Position = UDim2.fromScale(0.05,0.075)
 	knob.BackgroundColor3 = Color3.fromRGB(220,220,220)
 	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
 
-	-- Button layer
-	local btn = Instance.new("TextButton", toggleBg)
+	local btn = Instance.new("TextButton", bg)
 	btn.Size = UDim2.fromScale(1,1)
 	btn.BackgroundTransparency = 1
 	btn.Text = ""
 
-	-- Load state
 	local on = Config[key]
 	if on then
-		toggleBg.BackgroundColor3 = Color3.fromRGB(255,200,0)
+		bg.BackgroundColor3 = Color3.fromRGB(255,200,0)
 		knob.Position = UDim2.fromScale(0.5,0.075)
 	end
 
@@ -208,7 +176,7 @@ local function createToggle(text,key)
 		Config[key] = on
 		SaveConfig()
 
-		TweenService:Create(toggleBg,TweenInfo.new(0.2),{
+		TweenService:Create(bg,TweenInfo.new(0.2),{
 			BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(60,60,60)
 		}):Play()
 
@@ -218,11 +186,10 @@ local function createToggle(text,key)
 	end)
 end
 
-
--- ================= FARMING TOGGLES =================
+-- Toggles
 createToggle("Ignore Attack Katakuri","IgnoreKatakuri")
 createToggle("Hop Find Katakuri","HopKatakuri")
 createToggle("Auto Quest [Katakuri/Bone/Tyrant]","AutoQuest")
 createToggle("Start Farm","StartFarm")
 
-print("✅ Banana Cat Hub | A12 + A13 Loaded")
+print("✅ Banana Cat Hub LOADED (NO ERROR)")
