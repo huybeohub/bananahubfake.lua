@@ -1,5 +1,3 @@
--- Banana Cat Hub (UI ONLY) - Safe Roblox UI Practice
--- No exploit, no autofarm, no game injection
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
