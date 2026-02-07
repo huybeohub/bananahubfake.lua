@@ -318,5 +318,4 @@ local function bindToggle(name, state)
 end
 ```
 
-— Hoàn tất A17 + A18: UI Farming có đủ method, config gộp 1 chỗ, dễ copy & mở rộng.
 
