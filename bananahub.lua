@@ -128,6 +128,8 @@ header.TextColor3 = Color3.fromRGB(255,200,0)
 local farmList = Instance.new("UIListLayout", farmingSection)
 farmList.Padding = UDim.new(0,8)
 
+local TweenService = game:GetService("TweenService")
+
 local function toggleRow(text)
 	local row = Instance.new("Frame", farmingSection)
 	row.Size = UDim2.fromScale(1,0.1)
@@ -143,23 +145,97 @@ local function toggleRow(text)
 	label.TextXAlignment = Left
 	label.TextColor3 = Color3.fromRGB(230,230,230)
 
-	local toggle = Instance.new("TextButton", row)
-	toggle.Size = UDim2.fromScale(0.08,0.6)
-	oggle.Position = UDim2.fromScale(0.9,0.2)
-	toggle.Text = ""
-	toggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	Instance.new("UICorner", toggle).CornerRadius = UDim.new(0,6)
+	local toggleBg = Instance.new("Frame", row)
+	toggleBg.Size = UDim2.fromScale(0.1,0.5)
+	toggleBg.Position = UDim2.fromScale(0.85,0.25)
+	toggleBg.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	Instance.new("UICorner", toggleBg).CornerRadius = UDim.new(1,0)
+
+	local knob = Instance.new("Frame", toggleBg)
+	knob.Size = UDim2.fromScale(0.45,0.9)
+	knob.Position = UDim2.fromScale(0.05,0.05)
+	knob.BackgroundColor3 = Color3.fromRGB(200,200,200)
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+	local button = Instance.new("TextButton", toggleBg)
+	button.Size = UDim2.fromScale(1,1)
+	button.BackgroundTransparency = 1
+	button.Text = ""
 
 	local on = false
-	toggle.MouseButton1Click:Connect(function()
+	button.MouseButton1Click:Connect(function()
 		on = not on
-		toggle.BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(40,40,40)
+		TweenService:Create(toggleBg, TweenInfo.new(0.2), {
+			BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(40,40,40)
+		}):Play()
+		TweenService:Create(knob, TweenInfo.new(0.2), {
+			Position = on and UDim2.fromScale(0.5,0.05) or UDim2.fromScale(0.05,0.05)
+		}):Play()
 		print("[UI ONLY] Toggle", text, on)
 	end)
 end
+end
 
--- Select Method Farms (placeholder button)
-toggleRow("Select Method Farms")
+-- Select Method Farms (Dropdown)
+local methodRow = Instance.new("Frame", farmingSection)
+methodRow.Size = UDim2.fromScale(1,0.1)
+methodRow.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", methodRow).CornerRadius = UDim.new(0,10)
+
+local mLabel = Instance.new("TextLabel", methodRow)
+mLabel.Size = UDim2.fromScale(0.7,1)
+mLabel.BackgroundTransparency = 1
+mLabel.Text = "Select Method Farms"
+mLabel.Font = Enum.Font.Gotham
+mLabel.TextSize = 14
+mLabel.TextXAlignment = Left
+mLabel.TextColor3 = Color3.fromRGB(230,230,230)
+
+local selectBtn = Instance.new("TextButton", methodRow)
+selectBtn.Size = UDim2.fromScale(0.22,0.6)
+selectBtn.Position = UDim2.fromScale(0.75,0.2)
+selectBtn.Text = ">"
+selectBtn.Font = Enum.Font.GothamBold
+selectBtn.TextSize = 16
+selectBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+selectBtn.TextColor3 = Color3.fromRGB(255,200,0)
+Instance.new("UICorner", selectBtn).CornerRadius = UDim.new(0,8)
+
+local dropdown = Instance.new("Frame", farmingSection)
+dropdown.Size = UDim2.fromScale(1,0)
+dropdown.BackgroundTransparency = 1
+dropdown.ClipsDescendants = true
+
+local dLayout = Instance.new("UIListLayout", dropdown)
+dLayout.Padding = UDim.new(0,6)
+
+local methods = {"Katakuri","Bone","Tyrant"}
+local open = false
+
+local function addOption(name)
+	local opt = Instance.new("TextButton", dropdown)
+	opt.Size = UDim2.fromScale(1,0.08)
+	opt.Text = name
+	opt.Font = Enum.Font.Gotham
+	opt.TextSize = 14
+	opt.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	opt.TextColor3 = Color3.fromRGB(230,230,230)
+	Instance.new("UICorner", opt).CornerRadius = UDim.new(0,8)
+
+	opt.MouseButton1Click:Connect(function()
+		mLabel.Text = "Method: "..name
+		print("[UI ONLY] Selected farm method:", name)
+	end)
+end
+
+for _,m in ipairs(methods) do addOption(m) end
+
+selectBtn.MouseButton1Click:Connect(function()
+	open = not open
+	TweenService:Create(dropdown, TweenInfo.new(0.25), {
+		Size = open and UDim2.fromScale(1,0.28) or UDim2.fromScale(1,0)
+	}):Play()
+end)
 
 -- Distance Farm Aura (display only)
 local dist = Instance.new("Frame", farmingSection)
