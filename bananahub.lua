@@ -161,6 +161,63 @@ local function createToggle(text,key)
 		SaveConfig()
 	end)
 end
+local function createToggle(text,key)
+	local row = Instance.new("Frame", farming)
+	row.Size = UDim2.fromScale(1,0.1)
+	row.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", row).CornerRadius = UDim.new(0,10)
+
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.fromScale(0.7,1)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextColor3 = Color3.fromRGB(230,230,230)
+
+	-- Toggle background
+	local toggleBg = Instance.new("Frame", row)
+	toggleBg.Size = UDim2.fromScale(0.18,0.45)
+	toggleBg.Position = UDim2.fromScale(0.78,0.275)
+	toggleBg.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	Instance.new("UICorner", toggleBg).CornerRadius = UDim.new(1,0)
+
+	-- Knob
+	local knob = Instance.new("Frame", toggleBg)
+	knob.Size = UDim2.fromScale(0.45,0.85)
+	knob.Position = UDim2.fromScale(0.05,0.075)
+	knob.BackgroundColor3 = Color3.fromRGB(220,220,220)
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+	-- Button layer
+	local btn = Instance.new("TextButton", toggleBg)
+	btn.Size = UDim2.fromScale(1,1)
+	btn.BackgroundTransparency = 1
+	btn.Text = ""
+
+	-- Load state
+	local on = Config[key]
+	if on then
+		toggleBg.BackgroundColor3 = Color3.fromRGB(255,200,0)
+		knob.Position = UDim2.fromScale(0.5,0.075)
+	end
+
+	btn.MouseButton1Click:Connect(function()
+		on = not on
+		Config[key] = on
+		SaveConfig()
+
+		TweenService:Create(toggleBg,TweenInfo.new(0.2),{
+			BackgroundColor3 = on and Color3.fromRGB(255,200,0) or Color3.fromRGB(60,60,60)
+		}):Play()
+
+		TweenService:Create(knob,TweenInfo.new(0.2),{
+			Position = on and UDim2.fromScale(0.5,0.075) or UDim2.fromScale(0.05,0.075)
+		}):Play()
+	end)
+end
+
 
 -- ================= FARMING TOGGLES =================
 createToggle("Ignore Attack Katakuri","IgnoreKatakuri")
